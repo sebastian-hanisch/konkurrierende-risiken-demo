@@ -1,0 +1,3 @@
+-r requirements.txt
+pytest>=8.0
+scipy>=1.11   # nur für die Quadratur im Orakel-Test (tests/test_oracle_konkurrierende_risiken.py)
