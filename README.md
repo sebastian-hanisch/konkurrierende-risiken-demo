@@ -1,7 +1,6 @@
 # Konkurrierende Risiken: LKW oder Bahn – Streamlit-Demo
 
-<!-- TODO nach dem Deploy: direkt hierher den Live-Link setzen (Leerzeile davor und danach):
-**[→ Demo live ausprobieren](https://sebastianhanisch-konkurrierende-risiken-demo.streamlit.app/)** -->
+**[→ Demo live ausprobieren](https://sebastianhanisch-konkurrierende-risiken-demo.streamlit.app/)**
 
 Teil der Linie **Überlebenszeit** (Zeit bis zum Ereignis bei Beobachtungen, die irgendwann abbrechen) in der „Konzepte“-Reihe für die Website „Sebastian Hanisch – Operations Research und Machine Learning“.
 Der Aufhänger ist die Abholung von Containern: Ein Container wird auf **einem von zwei Wegen** abgeholt, per **LKW** oder per **Bahn**; wer zuerst kommt, nimmt dem anderen die Chance (**konkurrierende Risiken**).
@@ -9,7 +8,7 @@ Gefragt ist der **Anteil**, der bis Tag $t$ per LKW abgeholt wird. Kaplan–Meie
 Die Demo führt das Verfahren an sechs Containern von Hand in Brüchen vor, hält es in einer simulierten Welt gegen die naive Rechnung (Bahn als zensiert, 1 − Kaplan–Meier) und gegen eine geschlossene Formel,
 prüft, dass die Anteile zu 100 % zusammenpassen, und trennt die Frage nach dem **Anteil** von der Frage nach der **Rate**.
 
-Gleicher Aufhänger Containerverweilzeit wie [verweilzeit-demo](https://github.com/sebastian-hanisch/verweilzeit-demo), dort mit nur einem Ausgang und ohne Zensierung. Die Kante in der Linie: von Kaplan–Meier (Stück 1) zu zwei Ausgängen.
+Gleicher Aufhänger Containerverweilzeit wie [verweilzeit-demo](https://github.com/sebastian-hanisch/verweilzeit-demo), dort mit nur einem Ausgang und ohne Zensierung. Der Schritt von der [kaplan-meier-demo](https://github.com/sebastian-hanisch/kaplan-meier-demo) hierher: von einem Ausgang zu zwei Ausgängen.
 Die Raten sind ausgedachte Zahlen; es werden keine Zahlen aus echten Terminals behauptet.
 
 **Annahme in dieser Demo, sichtbar in der App und hier: Die Zensierung ist unabhängig vom Ereignis.** Die simulierte Welt erfüllt sie; die Demo prüft sie nicht.
@@ -26,22 +25,22 @@ Gemessen ist außerdem, **wo der Fehler herkommt**: Die naive Rechnung bleibt im
 Wahrheit von 39,3 % auf 18,4 % fällt. Der Anteil, der per LKW abgeholt würde, **gäbe es die Bahn nicht**, ist 39,3 % (geschlossen 1 − e^(−0,10·5)). Die naive Rechnung liegt nahe bei diesem Anteil (um höchstens 0,8 Prozentpunkte darunter) und beantwortet
 unter unabhängigen Abholzeiten diese andere Frage (Eigenmessung und eigene Lesart, nicht aus einer Quelle). Ohne Bahn (Rate 0, sonst Standardwelt) sind beide Rechnungen in allen 200 Läufen gleich.
 
-## Befunde und Korrekturen gegenüber dem Plan
+## Befunde und Korrekturen gegenüber der ersten Messung
 
-(Plan: `PLAN-08-konkurrierende-risiken.md` der Linien-Planung; Messung dort: 200 Läufe mit numpy-Zufall, Rohausgabe `out_uz_v1_bis_v8.txt`, Messung V4.)
+(Die Vormessung ist eine erste, schnelle Messung vor dem Bau der Demo: 200 Läufe mit dem Zufallsgenerator von NumPy. Ihre Zahlen stehen hier nur als Vergleich.)
 
 1. **Zahlen weichen ab, es gilt die Zahl dieser Demo.** Vormessung: naive Rechnung 0,40 (+40 %), kumulierte Inzidenz 0,29, Wahrheit 0,285. Diese Demo (SplitMix64, Zufalls-Seed 35, 200 Läufe, gleiche Welt):
    naive Rechnung 38,9 % (36 % der Wahrheit mehr), kumulierte Inzidenz 28,2 %. Über sechs Zufalls-Seeds liegt das Mittel der naiven Rechnung zwischen 38,9 % und 39,5 %,
-   das der kumulierten Inzidenz zwischen 28,2 % und 28,6 %. „+40 %“ steht nicht als Befund dieser Demo da; die Voraussetzung jeder Zahl ist LKW 0,10, Bahn 0,15, Tag 5, n = 300, Fenster 15 Tage (Entscheidung Z3).
-2. **Der Plan sagt „zu hoch“, die Messung sagt genauer, wozu.** Die naive Zahl liegt für alle sechs Bahn-Raten der Reihe zwischen 38,6 % und 39,3 % (Tabelle unten), der Anteil „ohne Bahn“ ist 39,3 %. Das ist Eigenmessung in dieser Welt (unabhängige
+   das der kumulierten Inzidenz zwischen 28,2 % und 28,6 %. „+40 %“ steht nicht als Befund dieser Demo da; die Voraussetzung jeder Zahl ist LKW 0,10, Bahn 0,15, Tag 5, n = 300, Fenster 15 Tage.
+2. **Die ursprüngliche Erwartung war „zu hoch“, die Messung sagt genauer, wozu.** Die naive Zahl liegt für alle sechs Bahn-Raten der Reihe zwischen 38,6 % und 39,3 % (Tabelle unten), der Anteil „ohne Bahn“ ist 39,3 %. Das ist Eigenmessung in dieser Welt (unabhängige
    latente Abholzeiten, konstante Raten) und die Lesart dazu ist unser Schluss.
-3. **Neu gegenüber dem Plan:** Zu jedem Datensatz gilt 1 − Kaplan–Meier (Bahn zensiert) ≥ kumulierte Inzidenz, mit Gleichheit genau dann, wenn die Bahn vor der letzten LKW-Abholung nichts abholt (Beweis im
-   Expander der App; Eigenschaftstests an 60 Zufallsdatensätzen und an kleinen Datensätzen mit Gleichständen, 120 gezogen, davon die ohne LKW-Abholung ausgenommen). Der Plan nennt ihn nicht.
-4. **Streuung ausgewiesen** (Plan: „Streuung der Schätzer nicht ausgewiesen“): Standardabweichung über die Läufe für n = 50, 100, 300, 600 (Tabelle unten).
-5. **Experiment 4 anders gelesen als im Plan.** Der Plan fragt „Wie schnell geht er per LKW, falls er per LKW geht?“. Die ursachenspezifische Rate bezieht sich auf die **noch wartenden** Container, nicht auf
+3. **Neu gegenüber der ersten Messung:** Zu jedem Datensatz gilt 1 − Kaplan–Meier (Bahn zensiert) ≥ kumulierte Inzidenz, mit Gleichheit genau dann, wenn die Bahn vor der letzten LKW-Abholung nichts abholt (Beweis im
+   Expander der App; Eigenschaftstests an 60 Zufallsdatensätzen und an kleinen Datensätzen mit Gleichständen, 120 gezogen, davon die ohne LKW-Abholung ausgenommen). Die erste Messung nennt ihn nicht.
+4. **Streuung ausgewiesen** (die erste Messung wies die Streuung der Schätzer nicht aus): Standardabweichung über die Läufe für n = 50, 100, 300, 600 (Tabelle unten).
+5. **Experiment 4 anders gelesen als ursprünglich erwartet.** Ursprünglich lautete die Frage „Wie schnell geht er per LKW, falls er per LKW geht?“. Die ursachenspezifische Rate bezieht sich auf die **noch wartenden** Container, nicht auf
    die Teilmenge, die später per LKW abgeholt wird; die Demo fragt deshalb „Wie schnell holt der LKW die noch wartenden Container ab?“. Die Verteilung der Zeit unter der Bedingung „per LKW abgeholt“ wird nicht gezeigt.
-6. **Fine–Gray nur als Satz** (Entscheidung Z2): kein Rechnen, keine Zahl.
-7. **Orakel:** Der Plan nennt die geschlossene Formel und eine große Simulation. Hinzu kommt ein dritter Weg (Umverteilung nach rechts in exakten Brüchen, Abschnitt „Tests“), weil die Formel nur Erwartungswerte prüft
+6. **Fine–Gray nur als Satz:** kein Rechnen, keine Zahl.
+7. **Orakel:** Als Orakel waren zunächst die geschlossene Formel und eine große Simulation vorgesehen. Hinzu kommt ein dritter Weg (Umverteilung nach rechts in exakten Brüchen, Abschnitt „Tests“), weil die Formel nur Erwartungswerte prüft
    und die Simulation nur mit Band.
 8. **Kein Fremdcode-Orakel** (lifelines, statsmodels fehlen im Test-venv): Die kumulierte Inzidenz ist gegen die drei Rechenwege oben geprüft, nicht gegen eine Fremdbibliothek.
 
@@ -55,7 +54,7 @@ $F_1(t) = \frac{h_1}{h_1+h_2}\,(1 - e^{-(h_1+h_2)t})$. Die Schätzer:
 - **Naive Rechnung:** $1 - \prod (1 - d_{1k}/n_k)$, die Bahn-Abholungen als zensiert.
 
 Formeln, Beweis der Ungleichung, Herleitung der geschlossenen Formel und Symboltabelle stehen im Expander „📐 Mathematische Formulierung“ der App, mit Lesehilfe. Gleichzeitige Abholungen zählen alle zur selben Zeit; bei
-gleicher Zeit zählt das Ereignis vor der Zensierung. Der Kern (`kkr_core.py`) ist eine Kopie aus der Linien-Vorlage (`ueberlebenszeit-planung/kern/uz_core.py`, Stand 2026-11-10): SplitMix64-Zufall, Eingabeprüfung,
+gleicher Zeit zählt das Ereignis vor der Zensierung. Der Kern (`kkr_core.py`) ist eine Kopie des gemeinsamen Kerns `uz_core.py` der Überlebenszeit-Linie (Stand 2026-11-10): SplitMix64-Zufall, Eingabeprüfung,
 Kaplan–Meier und `cumulative_incidence`; `tests/test_core.py` vergleicht die Funktionstexte mit der Quelle, falls sie vorhanden ist.
 
 ## Methodik
@@ -183,7 +182,7 @@ Am Tag 8 steht die kumulierte Inzidenz des LKW bei 7/12 und die der Bahn bei 5/1
 - **Eine Welt:** zwei Ursachen, konstante Raten, ein Beobachtungsfenster als Zensierung. Die Größen anderer Welten (steigende Raten, mehr Ursachen, abhängige Zeiten) sind nicht gemessen; nur die Rechenaussagen „naiv ≥ kumuliert“ und „Summe der Anteile = 1“
   gelten für jeden Datensatz.
 - **„Ohne Bahn“ ist eine Lesart, die Unabhängigkeit braucht.** Ob die latenten Abholzeiten unabhängig sind, lässt sich aus (Zeit, Ursache) allein weder bestätigen noch widerlegen: Zu jeder glatten gemeinsamen
-  Verteilung gibt es eine mit unabhängigen Zeiten, die dieselben beobachtbaren Teilüberlebensfunktionen liefert (Tsiatis 1975, PNAS 72(1), 20–22, Satz 2, Seite 21; Lesestufe Volltext (Scan der drei Seiten) laut dem Lektüre-Bericht der Linien-Planung). Die kumulierte Inzidenz braucht diese Unabhängigkeit nicht.
+  Verteilung gibt es eine mit unabhängigen Zeiten, die dieselben beobachtbaren Teilüberlebensfunktionen liefert (Tsiatis 1975, PNAS 72(1), 20–22, Satz 2, Seite 21; im Volltext gelesen, Scan der drei Seiten). Die kumulierte Inzidenz braucht diese Unabhängigkeit nicht.
 - **Keine Konfidenzbänder der kumulierten Inzidenz.** Die App zeigt die Streuung über Läufe, nicht die Unsicherheit eines einzelnen Datensatzes.
 - **Am Ende des Beobachtungsfensters** sind kaum noch Container im Risiko; die Kurven werden dort grob. Die Frage an Tag 30 bei einem Fenster von 5 Tagen läuft ohne Fehler, die Kurve ist dann nach der letzten
   Abholung konstant fortgesetzt.
@@ -219,7 +218,7 @@ Die Suite hat **142 Tests** (`pytest --collect-only -q tests`); Orakel-, Eigensc
 
 | Datei | Prüft |
 |---|---|
-| `tests/test_core.py` | kopierte Kernfunktionen (Kaplan–Meier, kumulierte Inzidenz, Eingabeprüfung, SplitMix64) gegen die Handbeispiele der Linie; Funktionstexte gegen die Quelle |
+| `tests/test_core.py` | kopierte Kernfunktionen (Kaplan–Meier, kumulierte Inzidenz, Eingabeprüfung, SplitMix64) gegen Handbeispiele; Funktionstexte gegen die Quelle |
 | `tests/test_model.py` | Handtabellen aller vier Muster in Brüchen, geschlossene Wahrheit, schnelle Schätzer gegen den Kern (150 Datensätze mit Gleichständen), Datenerzeugung, Läufe |
 | `tests/test_oracle_konkurrierende_risiken.py` | drei unabhängige Wege: Umverteilung nach rechts in exakten Brüchen (200 + 200 + 200 Zufallsdatensätze mit Gleichständen, Handtabellen Bruch für Bruch), Quadratur der geschlossenen Formel (SciPy, übersprungen, wenn es fehlt), große Simulation (n = 40 000) mit Band |
 | `tests/test_eigenschaften_konkurrierende_risiken.py` | Summe = 1, Monotonie, ohne Konkurrenz kumuliert = 1 − Kaplan–Meier, naiv ≥ kumuliert (und Gleichheit genau ohne Bahn vor der letzten LKW-Abholung), Umsortieren, Skalieren der Zeit, Vertauschen der Wege, gepaarte Welten |
@@ -231,7 +230,7 @@ Die Suite hat **142 Tests** (`pytest --collect-only -q tests`); Orakel-, Eigensc
 
 **Zahl → Test.** Zahlen aus den Messungen 1 bis 6 und aus den Presets: eingefroren in der JSON-Datei und in `tests/test_claims.py` mit dem Code der Demo neu gerechnet (Band 1e-9, Zählungen exakt); die Tabellen der
 README stammen Wort für Wort aus der Datei. Die Brüche der Handtabelle: exakt in `tests/test_model.py` und `tests/test_oracle_konkurrierende_risiken.py`. Die geschlossene Wahrheit (28,5 % und 39,3 % in
-den Beispielen): `tests/test_model.py` (Handwert) und `tests/test_oracle_konkurrierende_risiken.py` (Quadratur, Simulation mit Band). Weitere Zahlen im Text sind Handwerte (Brüche), Rechnungen aus der geschlossenen Formel oder aus der JSON-Datei; die Plan-Zahlen aus der Vormessung (0,40; 0,29; +40 %) stehen nur als Vergleich im Abschnitt „Befunde und Korrekturen gegenüber dem Plan“.
+den Beispielen): `tests/test_model.py` (Handwert) und `tests/test_oracle_konkurrierende_risiken.py` (Quadratur, Simulation mit Band). Weitere Zahlen im Text sind Handwerte (Brüche), Rechnungen aus der geschlossenen Formel oder aus der JSON-Datei; die Zahlen der Vormessung (0,40; 0,29; +40 %) stehen nur als Vergleich im Abschnitt „Befunde und Korrekturen gegenüber der ersten Messung“.
 
 ## Dateistruktur
 
@@ -241,7 +240,7 @@ den Beispielen): `tests/test_model.py` (Handwert) und `tests/test_oracle_konkurr
 | `.gitignore` | venv, Caches, Streamlit-Secrets |
 | `.streamlit/config.toml` | Streamlit-Einstellungen (keine Nutzungsstatistik) |
 | `app.py` | Streamlit-App: vier Experimente, Annahmen, Formeln |
-| `kkr_core.py` | Kopie aus `ueberlebenszeit-planung/kern/uz_core.py` (SplitMix64, Eingabeprüfung, Kaplan–Meier, kumulierte Inzidenz); wird nicht verändert |
+| `kkr_core.py` | Kopie des gemeinsamen Kerns `uz_core.py` der Überlebenszeit-Linie (Stand 2026-11-10; SplitMix64, Eingabeprüfung, Kaplan–Meier, kumulierte Inzidenz); wird nicht verändert |
 | `kkr_model.py` | geschlossene Wahrheit, Schätzer (kern- und sortiert), Handtabelle in Brüchen, Läufe, Reihen |
 | `kkr_scenario.py` | Welt (World), Datenerzeugung mit SplitMix64, die vier Muster von Experiment 1 |
 | `kkr_evaluation.py` | Formatierung, Zeitraster, Verdikte als reine Funktionen |
@@ -258,7 +257,7 @@ den Beispielen): `tests/test_model.py` (Handwert) und `tests/test_oracle_konkurr
 
 - **Fine–Gray** und jede Regression mit Merkmalen der Container (kein Cox, keine Gruppenvergleiche); die Demo hat nur zwei Ursachen ohne Merkmale.
 - **Konfidenzbänder** der kumulierten Inzidenz und Tests auf Gleichheit zweier kumulierter Inzidenzen.
-- **Mehr als zwei Ursachen**, abhängige latente Zeiten und abhängige Zensierung (die Annahme der unabhängigen Zensierung wird in der Linie in einem eigenen Stück geprüft).
+- **Mehr als zwei Ursachen**, abhängige latente Zeiten und abhängige Zensierung (die Annahme der unabhängigen Zensierung wird in der [informatives-zensieren-demo](https://github.com/sebastian-hanisch/informatives-zensieren-demo) untersucht).
 - **Nichtparametrische ursachenspezifische Raten** (Nelson–Aalen) und die bedingte Verteilung der Zeit unter „per LKW abgeholt“.
 - **Echte Terminal-Daten:** Alle Raten sind ausgedachte Zahlen.
 - **PDF-Export.**
@@ -284,4 +283,4 @@ Gebaut mit Streamlit, Plotly und NumPy.
 
 ---
 
-Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zu den Demos: [Interaktive Demos](https://sebastianhanisch.net/demos.html).
+Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zur Reihe: [Überlebenszeit: zensierte Zeiten lesen](https://sebastianhanisch.net/konzepte-ueberlebenszeit.html).

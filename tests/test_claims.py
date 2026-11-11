@@ -85,7 +85,7 @@ def test_standardwelt_zahlen_der_readme():
 
 
 def test_plan_vergleich_steht_in_der_readme_mit_der_quelle_der_zahlen():
-    assert "Vormessung: naive Rechnung 0,40 (+40 %), kumulierte Inzidenz 0,29, Wahrheit 0,285" in README and "out_uz_v1_bis_v8.txt" in README
+    assert "Vormessung: naive Rechnung 0,40 (+40 %), kumulierte Inzidenz 0,29, Wahrheit 0,285" in README
     assert S["naive_mean"] < 0.395 and S["naive_mean"] != pytest.approx(0.40, abs=0.005)   # die Demo-Zahl weicht von 0,40 ab: es gilt die eigene
 
 
